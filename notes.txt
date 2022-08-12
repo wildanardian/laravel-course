@@ -1,0 +1,36 @@
+1. route
+2. controller
+3. views
+4. model (optional untuk database)
+
+Security by Token Only (1 layer)
+1. Masuk ke login form
+2. cek berdasarkan username yang ada di database, jika users nya null maka akan kembali ke halaman sebelumnya
+3. jika users-nya ada, maka dapatkan password yang ada di db. bikin variabel untuk hash password
+4. cara cek nya dengan menggunakan $hased_password = Hash::check($request->password, $hased_password)
+5. cek jika $hased_password true, maka masukan token ke dalam db, bisa dengan cara Str::random(20). lalu save()
+    masukkan session dengan $request->session()->put('token', $users->token);
+    untuk memasukkan token ke dalam session yang ada di laravel
+6. setelah login maka kembalikan ke view dashboard.index
+
+Untuk Validasi ketika langsung menuliskan route ke /dashboard, sudah login atau belum
+1. cek session-nya ada token atau tidak, jika ada tokennya maka cari di db, token yang sama dengan 
+    Session::get('token')->first();
+    return kan ke view dashboard.index dengan mengirimkan value token yang ada di db
+2. jika salah maka, kembalikan ke view sebelumnya
+
+Untuk logout
+1. di view, buat form input dengan method post dan action logout sesuai dengan yang ada di web.php
+2. tambahkan input value dengan type hidden dan value token (yang didapatkan dari value yang dikirimkan
+    ketika validasi berada di dashboard_index() )
+
+    <form method="POST" action={{ route('dashboard_logout') }}>
+        @csrf
+        <input name="token" type="hidden" value={{ $token }}></inpu>
+        <button type="submit">LOGOUT</button>
+    </form>
+
+3. dapatkan token user yang ada di database, yang nilainya sama dengan $request->token, dan update value-nya
+    menjadi NULL
+4. token yang ada di session kita hapus dengan menggunakan Session::pull('token')
+5. kita return ke route login lagi
